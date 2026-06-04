@@ -1,0 +1,25 @@
+# Netlify configuration for EMIS Frontend
+
+[build]
+  # The directory to build from (relative to the root of the repo)
+  base = "frontend"
+  # The command to build the frontend
+  command = "npm run build"
+  # The directory where the built files will be located
+  publish = "dist"
+
+# Template for proxying API requests to your hosted backend (e.g., on Render or Railway).
+# UNCOMMENT and update the 'to' URL once you deploy your backend!
+# This handles CORS automatically and lets you keep using relative URLs (like /api/auth) in your frontend.
+#
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://your-backend-name.onrender.com/api/:splat"
+#   status = 200
+#   force = true
+
+# Rule to rewrite all router paths to index.html for Single Page App (SPA) routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
