@@ -2,7 +2,7 @@
 
 [build]
   # The directory to build from (relative to the root of the repo)
-  base = "frontend"
+  base = ""
   # The command to build the frontend
   command = "npm run build"
   # The directory where the built files will be located
