@@ -44,9 +44,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login handler
-  const login = async (authorizationNumber) => {
+  const login = async (email, rfid) => {
     try {
-      const res = await api.post('/api/auth/login', { authorization_number: authorizationNumber });
+      const res = await api.post('/api/auth/login', { email, rfid });
       const { token, user: userData } = res.data;
       
       localStorage.setItem('token', token);
@@ -60,10 +60,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Register handler
-  const register = async (authorizationNumber, name, email, role = 'user') => {
+  const register = async (rfid, name, email, role = 'user') => {
     try {
       const res = await api.post('/api/auth/register', {
-        authorization_number: authorizationNumber,
+        rfid,
         name,
         email,
         role

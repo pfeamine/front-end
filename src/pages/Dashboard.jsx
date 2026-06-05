@@ -130,7 +130,7 @@ const Dashboard = () => {
           <div className="flex items-center gap-3">
             <img src="/emis-logo.png" alt="EMIS" className="h-9 object-contain" />
             <div className="hidden sm:block">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Electric Management Infrastructure System</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">EMIS</p>
             </div>
           </div>
 
@@ -198,9 +198,9 @@ const Dashboard = () => {
             <p className="text-xs text-slate-400 mt-1">all-time bookings</p>
           </div>
           <div className="stat-card">
-            <p className="text-xs font-semibold text-cyan-500 uppercase tracking-wide mb-1">Your Code</p>
-            <p className="text-2xl font-extrabold text-slate-800 font-mono tracking-widest">{user.authorization_number}</p>
-            <p className="text-xs text-slate-400 mt-1">authorization number</p>
+            <p className="text-xs font-semibold text-cyan-500 uppercase tracking-wide mb-1">Your RFID</p>
+            <p className="text-2xl font-extrabold text-slate-800 font-mono tracking-widest">{user.rfid}</p>
+            <p className="text-xs text-slate-400 mt-1">RFID Code</p>
           </div>
         </div>
 

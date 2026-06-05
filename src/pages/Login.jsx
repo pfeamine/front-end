@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, AlertCircle, Zap } from 'lucide-react';
 
 const Login = () => {
-  const [authNumber, setAuthNumber] = useState('');
+  const [email, setEmail]           = useState('');
+  const [rfid, setRfid]             = useState('');
   const [error, setError]           = useState('');
   const [loading, setLoading]       = useState(false);
   const [showCode, setShowCode]     = useState(false);
@@ -12,34 +13,47 @@ const Login = () => {
   const { login } = useAuth();
   const navigate  = useNavigate();
 
-  const handleInput = (e) => {
-    const v = e.target.value;
-    if (/^\d*$/.test(v) && v.length <= 8) { setAuthNumber(v); setError(''); }
+  const handleRfidInput = (e) => {
+    const v = e.target.value.toUpperCase();
+    // Allow only hexadecimal characters (0-9, A-F) and limit length to 8
+    if (/^[0-9A-F]*$/.test(v) && v.length <= 8) {
+      setRfid(v);
+      setError('');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (authNumber.length !== 8) { setError('Authorization number must be exactly 8 digits.'); return; }
-    setLoading(true); setError('');
-    const res = await login(authNumber);
+    if (!email) {
+      setError('Please enter your email address.');
+      return;
+    }
+    if (rfid.length !== 8) {
+      setError('RFID must be exactly 8 characters.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    const res = await login(email, rfid);
     setLoading(false);
-    if (res.success) navigate('/');
-    else setError(res.error);
+    if (res.success) {
+      navigate('/');
+    } else {
+      setError(res.error);
+    }
   };
 
-  const filled = authNumber.length;
+  const filled = rfid.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50/30 to-blue-50/20 flex items-center justify-center px-4 py-12">
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50/20 to-blue-50/10 flex items-center justify-center px-4 py-12">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-cyan-100 rounded-full blur-3xl opacity-40" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-30" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-cyan-100/50 rounded-full blur-3xl opacity-40" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-100/40 rounded-full blur-3xl opacity-30" />
       </div>
 
       <div className="w-full max-w-md relative">
-
         {/* Logo + Brand */}
         <div className="text-center mb-8 animate-fadeInUp">
           <img
@@ -51,7 +65,7 @@ const Login = () => {
             Welcome to <span className="text-cyan-500">EMIS</span>
           </h1>
           <p className="mt-1 text-sm text-slate-400 font-medium">
-            Electric Management Infrastructure System
+            EMIS
           </p>
         </div>
 
@@ -67,17 +81,31 @@ const Login = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Authorization Number */}
+            {/* Email Address */}
             <div>
-              <label className="label">Authorization Number</label>
+              <label className="label">Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setError(''); }}
+                placeholder="john@example.com"
+                className="input text-left"
+                autoComplete="email"
+                required
+              />
+            </div>
+
+            {/* RFID Code */}
+            <div>
+              <label className="label">RFID Code</label>
               <div className="relative">
                 <input
-                  id="auth-number"
+                  id="rfid-code"
                   type={showCode ? 'text' : 'password'}
-                  value={authNumber}
-                  onChange={handleInput}
-                  placeholder="Enter 8-digit code"
-                  className="input pr-12 text-center tracking-[0.3em] text-xl font-bold"
+                  value={rfid}
+                  onChange={handleRfidInput}
+                  placeholder="Enter 8-character RFID"
+                  className="input pr-12 text-center tracking-[0.3em] text-xl font-bold font-mono"
                   autoComplete="off"
                 />
                 <button
@@ -100,13 +128,13 @@ const Login = () => {
                   />
                 ))}
               </div>
-              <p className="text-xs text-slate-400 text-center mt-1.5">{filled}/8 digits</p>
+              <p className="text-xs text-slate-400 text-center mt-1.5">{filled}/8 characters (0-9, A-F)</p>
             </div>
 
             <button
               type="submit"
               className="btn-primary w-full py-3.5 text-base mt-2"
-              disabled={loading || filled !== 8}
+              disabled={loading || rfid.length !== 8 || !email}
             >
               {loading ? (
                 <>
@@ -133,7 +161,7 @@ const Login = () => {
         </div>
 
         <p className="text-center text-xs text-slate-300 mt-6">
-          © {new Date().getFullYear()} EMIS — Electric Management Infrastructure System
+          © {new Date().getFullYear()} EMIS
         </p>
       </div>
     </div>

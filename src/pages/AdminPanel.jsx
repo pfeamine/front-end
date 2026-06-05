@@ -29,12 +29,16 @@ const AdminPanel = () => {
 
   /* ─── Create User Form ───── */
   const [createForm, setCreateForm] = useState({
-    name: '', email: '', authorization_number: '', role: 'user'
+    name: '', email: '', rfid: '', role: 'user'
   });
-  const genCode = () => setCreateForm(p => ({
-    ...p,
-    authorization_number: Array.from({length:8}, () => Math.floor(Math.random()*10)).join('')
-  }));
+  const genCode = () => {
+    const chars = '0123456789ABCDEF';
+    const code = Array.from({length:8}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+    setCreateForm(p => ({
+      ...p,
+      rfid: code
+    }));
+  };
 
   /* ─── Proxy Booking Form ─── */
   const [adminBooking, setAdminBooking] = useState({
@@ -66,13 +70,13 @@ const AdminPanel = () => {
   /* ─── Create User ─────────────────────────── */
   const handleCreateUser = async (e) => {
     e.preventDefault();
-    const { name, email, authorization_number, role } = createForm;
-    if (authorization_number.length !== 8) { notify('Authorization number must be exactly 8 digits.', true); return; }
+    const { name, email, rfid, role } = createForm;
+    if (rfid.length !== 8) { notify('RFID must be exactly 8 characters.', true); return; }
     try {
-      const r = await api.post('/api/auth/register', { authorization_number, name, email, role });
+      const r = await api.post('/api/auth/register', { rfid, name, email, role });
       notify(`Account created for ${r.data.user.name}.`);
       setShowCreate(false);
-      setCreateForm({ name:'', email:'', authorization_number:'', role:'user' });
+      setCreateForm({ name:'', email:'', rfid:'', role:'user' });
       fetchData();
     } catch (err) {
       notify(err.response?.data?.error || err.response?.data?.errors?.join(', ') || 'Creation failed.', true);
@@ -170,7 +174,7 @@ const AdminPanel = () => {
   const filtered = users.filter(u =>
     u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
     u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.authorization_number.includes(userSearch)
+    (u.rfid && u.rfid.toLowerCase().includes(userSearch.toLowerCase()))
   );
 
   const fmt = iso => new Date(iso).toLocaleString([], { dateStyle:'medium', timeStyle:'short' });
@@ -285,7 +289,7 @@ const AdminPanel = () => {
                   </div>
                   <div>
                     <label className="label flex items-center justify-between">
-                      Authorization Number (8 digits)
+                      RFID Code (8 characters)
                       <button type="button" onClick={genCode} className="text-cyan-500 hover:text-cyan-600 flex items-center gap-1 text-xs font-normal normal-case">
                         <Shuffle className="w-3 h-3" /> Generate
                       </button>
@@ -293,11 +297,12 @@ const AdminPanel = () => {
                     <input
                       className="input font-mono tracking-widest text-lg"
                       placeholder="12345678"
-                      value={createForm.authorization_number}
+                      value={createForm.rfid}
                       maxLength={8}
                       onChange={e => {
-                        if (/^\d*$/.test(e.target.value) && e.target.value.length <= 8)
-                          setCreateForm(p=>({...p, authorization_number:e.target.value}));
+                        const val = e.target.value.toUpperCase();
+                        if (/^[0-9A-F]*$/.test(val) && val.length <= 8)
+                          setCreateForm(p=>({...p, rfid:val}));
                       }}
                       required
                     />
@@ -312,7 +317,7 @@ const AdminPanel = () => {
                   </div>
                   <div className="sm:col-span-2 flex justify-end gap-3">
                     <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary py-2 px-5">Cancel</button>
-                    <button type="submit" className="btn-primary py-2 px-6 gap-2" disabled={createForm.authorization_number.length !== 8}>
+                    <button type="submit" className="btn-primary py-2 px-6 gap-2" disabled={createForm.rfid.length !== 8}>
                       <Plus className="w-4 h-4" /> Create Account
                     </button>
                   </div>
@@ -327,7 +332,7 @@ const AdminPanel = () => {
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200">
                       <th className="p-4 font-semibold text-slate-500">User</th>
-                      <th className="p-4 font-semibold text-slate-500">Auth Code</th>
+                      <th className="p-4 font-semibold text-slate-500">RFID</th>
                       <th className="p-4 font-semibold text-slate-500 text-center">Role</th>
                       <th className="p-4 font-semibold text-slate-500 text-center">Status</th>
                       <th className="p-4 font-semibold text-slate-500 text-center">Action</th>
@@ -349,7 +354,7 @@ const AdminPanel = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 font-mono font-bold text-cyan-600 tracking-widest">{u.authorization_number}</td>
+                        <td className="p-4 font-mono font-bold text-cyan-600 tracking-widest">{u.rfid}</td>
                         <td className="p-4 text-center">
                           <span className={u.role === 'admin' ? 'badge-purple' : 'badge-slate'}>{u.role}</span>
                         </td>
